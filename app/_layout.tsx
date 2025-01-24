@@ -1,14 +1,14 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { PaperProvider } from 'react-native-paper';
 import 'react-native-reanimated';
-
+import {lightThemeRNP, DarkThemeRNP} from '../constants/ColorsRNP';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -28,12 +28,33 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <PaperProvider theme={colorScheme === 'dark' ? DarkThemeRNP : lightThemeRNP}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+      <Stack.Screen
+        name="index"
+        options={{
+          headerShown: false, // Mostrar el header
+        }}
+        />
+
+      {/* Stack 2: Ocultar el título */}
+      <Stack.Screen
+        name="sfisdata/index"
+        options={{
+          title: 'SFIS Data', // Título que aparecerá en la barra superior
+          headerShown: true, // Ocultar el header
+        }}
+      />
+      <Stack.Screen
+        name="sfisdata/historical"
+        options={{
+          title: 'SFIS Data', // Título que aparecerá en la barra superior
+          headerShown: true, // Ocultar el header
+        }}
+      />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+      </ThemeProvider>
+    </PaperProvider>
   );
 }
