@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Text,Button } from 'react-native-paper';
 import { ThemedView } from '@/components/ThemedView';
+import { useHistoryContext } from '../lib/HistoriContext';
 
 interface HistoryEntry {
   serialNumber: string;
@@ -42,11 +43,11 @@ interface ApiResponse {
 }
 
 const SfisData = () => {
-
+  const { setSharedData } = useHistoryContext();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
-  const { serial } = useLocalSearchParams();
+  const { serial }:{serial:string} = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState(true); 
   const [data, setData] = useState<SfisData>({}); 
   const [error, setError] = useState(null);
@@ -71,16 +72,53 @@ const SfisData = () => {
           redirect: "follow" as RequestRedirect
         };
         
-        debugger
         const response = await fetch(`http://10.58.10.61:9099/api/SfisData/GetSerialHistory`,requestOptions);
 
         if (!response) {
           throw new Error('Error al obtener datos');
         }
-
+        // const simulatedResponse:SfisData = {
+        //   serialNumber: serial,
+        //   modelName: 'Model XYZ',
+        //   lineName: 'Assembly Line 1',
+        //   sectionName: 'Section A',
+        //   groupName: 'Group Alpha',
+        //   stationName: 'Station 5',
+        //   result: 'Pass',
+        //   inStationTime: '2024-01-15 08:45:00',
+        //   outStationTime: '2024-01-15 09:00:00',
+        //   inLineTime: '2024-01-15 08:30:00',
+        //   history: [
+        //     {
+        //       serialNumber: '123456',
+        //       modelName: 'Model ABC',
+        //       lineName: 'Line 1',
+        //       sectionName: 'Section X',
+        //       groupName: 'Group 1',
+        //       stationName: 'Station 1',
+        //       result: 'Pass',
+        //       inStationTime: '2024-01-10 08:00:00',
+        //       outStationTime: '2024-01-10 08:15:00',
+        //       inLineTime: '2024-01-10 07:45:00',
+        //     },
+        //     {
+        //       serialNumber: '123456',
+        //       modelName: 'Model DEF',
+        //       lineName: 'Line 2',
+        //       sectionName: 'Section Y',
+        //       groupName: 'Group 2',
+        //       stationName: 'Station 3',
+        //       result: 'Fail',
+        //       inStationTime: '2024-01-12 09:00:00',
+        //       outStationTime: '2024-01-12 09:15:00',
+        //       inLineTime: '2024-01-12 08:45:00',
+        //     },
+        //   ]
+        // }
         const result:ApiResponse = await response.json();
         if(result.success){
           setData(result.data);
+          setSharedData(result.data.history)
         }
 
       } catch (err:any) {
@@ -128,21 +166,21 @@ const SfisData = () => {
       );
   }
   
-  const renderHistoryItem = ({ item, index }:{item:HistoryEntry,index:number}) => (
-    <ThemedView style={[styles.historyItem, isDarkMode ? styles.darkContainerHistory : styles.lightContainerHistory]}>
-      <Text style={[styles.historyHeader,isDarkMode ? styles.darkTextHistory : styles.lightTextHistory]}>History Item {index + 1}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Serial Number: {item.serialNumber}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Model Name: {item.modelName}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Line Name: {item.lineName}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Section Name: {item.sectionName}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Group Name: {item.groupName}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Station Name: {item.stationName ? 'Pass' : 'Fail'}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Result: {item.result}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >In Station Time: {item.inStationTime}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Out Station Time: {item.outStationTime}</Text>
-      <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >In Line Time: {item.inLineTime}</Text>
-    </ThemedView>
-  );
+  // const renderHistoryItem = ({ item, index }:{item:HistoryEntry,index:number}) => (
+  //   <ThemedView style={[styles.historyItem, isDarkMode ? styles.darkContainerHistory : styles.lightContainerHistory]}>
+  //     <Text style={[styles.historyHeader,isDarkMode ? styles.darkTextHistory : styles.lightTextHistory]}>History Item {index + 1}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Serial Number: {item.serialNumber}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Model Name: {item.modelName}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Line Name: {item.lineName}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Section Name: {item.sectionName}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Group Name: {item.groupName}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Station Name: {item.stationName ? 'Pass' : 'Fail'}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Result: {item.result}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >In Station Time: {item.inStationTime}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >Out Station Time: {item.outStationTime}</Text>
+  //     <Text style={isDarkMode ? styles.darkTextHistory : styles.lightTextHistory} >In Line Time: {item.inLineTime}</Text>
+  //   </ThemedView>
+  // );
 
   return (
     <ThemedView style={styles.container}>
@@ -206,6 +244,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 5,
+    justifyContent:'space-around'
   },
   generalInfo: {
     marginBottom: 20,

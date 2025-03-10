@@ -20,7 +20,6 @@ export default function HomeScreen() {
       alert('Please enter the serial number');
       return;
     }
-
     router.push(`/sfisdata?serial=${serial}`);
   }
 

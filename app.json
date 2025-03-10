@@ -49,6 +49,12 @@
             "flipper": true
           }
         }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "PORTRAIT_UP"
+        }
       ]
     ],
     "experiments": {

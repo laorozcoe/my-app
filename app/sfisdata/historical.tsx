@@ -1,76 +1,124 @@
-import * as React from 'react';
-import { DataTable } from 'react-native-paper';
+import { View, Text, StyleSheet } from "react-native";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { useState, useEffect } from "react";
+import { DataTable } from "react-native-paper";
+import { useHistoryContext } from "../lib/HistoriContext";
+import { ScrollView } from "react-native";
+import { ThemedView } from "@/components/ThemedView";
 
-const Historical = () => {
-  const [page, setPage] = React.useState<number>(0);
-  const [numberOfItemsPerPageList] = React.useState([2, 3, 4]);
-  const [itemsPerPage, onItemsPerPageChange] = React.useState(
+interface HistoryEntry {
+  serialNumber: string;
+  modelName: string;
+  lineName: string;
+  sectionName: string;
+  groupName: string;
+  stationName: string | null;
+  result: string;
+  inStationTime: string;
+  outStationTime: string;
+  inLineTime: string;
+}
+
+const HorizontalScreen = () => {
+  const { sharedData }: { sharedData: HistoryEntry[] } = useHistoryContext();
+  const [page, setPage] = useState<number>(0);
+  const [numberOfItemsPerPageList] = useState([2, 3, 4]);
+  const [itemsPerPage, onItemsPerPageChange] = useState(
     numberOfItemsPerPageList[0]
   );
 
-  const [items] = React.useState([
-   {
-     key: 1,
-     name: 'Cupcake',
-     calories: 356,
-     fat: 16,
-   },
-   {
-     key: 2,
-     name: 'Eclair',
-     calories: 262,
-     fat: 16,
-   },
-   {
-     key: 3,
-     name: 'Frozen yogurt',
-     calories: 159,
-     fat: 6,
-   },
-   {
-     key: 4,
-     name: 'Gingerbread',
-     calories: 305,
-     fat: 3.7,
-   },
-  ]);
-
   const from = page * itemsPerPage;
-  const to = Math.min((page + 1) * itemsPerPage, items.length);
+  const to = Math.min((page + 1) * itemsPerPage, sharedData.length);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setPage(0);
   }, [itemsPerPage]);
 
+  useEffect(() => {
+    const lockOrientation = async () => {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.LANDSCAPE
+      );
+    };
+
+    lockOrientation();
+
+    return () => {
+      ScreenOrientation.unlockAsync();
+    };
+  }, []);
+
   return (
-    <DataTable>
-      <DataTable.Header>
-        <DataTable.Title>Dessert</DataTable.Title>
-        <DataTable.Title numeric>Calories</DataTable.Title>
-        <DataTable.Title numeric>Fat</DataTable.Title>
-      </DataTable.Header>
+    <ThemedView style={styles.container}>
+      <ScrollView horizontal>
+        <DataTable>
+          <DataTable.Header style={styles.header}>
+            <DataTable.Title style={styles.title}>serialNumber</DataTable.Title>
+            <DataTable.Title style={styles.title}>modelName</DataTable.Title>
+            <DataTable.Title style={styles.title}>lineName</DataTable.Title>
+            <DataTable.Title style={styles.title}>sectionName</DataTable.Title>
+            <DataTable.Title style={styles.title}>groupName</DataTable.Title>
+            <DataTable.Title style={styles.title}>stationName</DataTable.Title>
+            <DataTable.Title style={styles.title}>result</DataTable.Title>
+            <DataTable.Title style={styles.title}>inStationTime</DataTable.Title>
+            <DataTable.Title style={styles.title}>outStationTime</DataTable.Title>
+            <DataTable.Title style={styles.title}>inLineTime</DataTable.Title>
+          </DataTable.Header>
 
-      {items.slice(from, to).map((item) => (
-        <DataTable.Row key={item.key}>
-          <DataTable.Cell>{item.name}</DataTable.Cell>
-          <DataTable.Cell numeric>{item.calories}</DataTable.Cell>
-          <DataTable.Cell numeric>{item.fat}</DataTable.Cell>
-        </DataTable.Row>
-      ))}
+          {sharedData.slice(from, to).map((item: any, index: number) => (
+            <DataTable.Row key={index} style={styles.row}>
+              <DataTable.Cell style={styles.cell}>{item.serialNumber}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.modelName}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.lineName}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.sectionName}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.groupName}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.stationName}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.result}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.inStationTime}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.outStationTime}</DataTable.Cell>
+              <DataTable.Cell style={styles.cell}>{item.inLineTime}</DataTable.Cell>
+            </DataTable.Row>
+          ))}
 
-      <DataTable.Pagination
-        page={page}
-        numberOfPages={Math.ceil(items.length / itemsPerPage)}
-        onPageChange={(page) => setPage(page)}
-        label={`${from + 1}-${to} of ${items.length}`}
-        numberOfItemsPerPageList={numberOfItemsPerPageList}
-        numberOfItemsPerPage={itemsPerPage}
-        onItemsPerPageChange={onItemsPerPageChange}
-        showFastPaginationControls
-        selectPageDropdownLabel={'Rows per page'}
-      />
-    </DataTable>
+          <DataTable.Pagination
+            page={page}
+            numberOfPages={Math.ceil(sharedData.length / itemsPerPage)}
+            onPageChange={(page) => setPage(page)}
+            label={`${from + 1}-${to} of ${sharedData.length}`}
+            numberOfItemsPerPageList={numberOfItemsPerPageList}
+            numberOfItemsPerPage={itemsPerPage}
+            onItemsPerPageChange={onItemsPerPageChange}
+            showFastPaginationControls
+            selectPageDropdownLabel={"Rows per page"}
+          />
+        </DataTable>
+      </ScrollView>
+    </ThemedView>
   );
 };
 
-export default Historical;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  header: {
+  },
+  title: {
+    fontWeight: "bold",
+    textAlign: "center", // Asegurar que los textos estén centrados
+    paddingHorizontal: 12, // Espaciado horizontal
+  },
+  cell: {
+    textAlign: "center", // Centrar el texto
+    paddingHorizontal: 12, // Espaciado horizontal en las celdas
+    fontSize: 14, // Tamaño de fuente
+  },
+  row: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc", // Línea de separación entre filas
+  },
+});
+
+export default HorizontalScreen;
